@@ -40,6 +40,19 @@ class MyAppState extends ChangeNotifier {
     current = WordPair.random();
     notifyListeners();
   }
+
+  var favorites = <WordPair>{};
+  // var = new property 
+
+  void toggleFavorite() {
+    // void = method 
+    if (favorites.contains(current)) {
+      favorites.remove(current);
+    } else {
+      favorites.add(current);
+    }
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatelessWidget {
@@ -99,4 +112,4 @@ class BigCard extends StatelessWidget {
   }
 }
 
-// https://codelabs.developers.google.com/codelabs/flutter-codelab-first#5
+// https://codelabs.developers.google.com/codelabs/flutter-codelab-first#5:~:text=calls%20notifyListeners()%3B%20afterwards.-,Add%20the%20button,-With%20the%20%22business
