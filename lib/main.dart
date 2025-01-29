@@ -55,33 +55,91 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
+// ...
+
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;   
-
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            //Text('A random AWESOME idea:'),
-            BigCard(pair: pair),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                appState.getNext();
-                print(pair.asPascalCase);
+      body: Row(
+        children: [
+          SafeArea(
+            child: NavigationRail(
+              extended: false,
+              destinations: [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite),
+                  label: Text('Favorites'),
+                ),
+              ],
+              selectedIndex: 0,
+              onDestinationSelected: (value) {
+                print('selected: $value');
               },
-              child: Text('Next'),
-            )
-          ],
-        ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: GeneratorPage(),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
+
+class GeneratorPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var pair = appState.current;
+
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          BigCard(pair: pair),
+          SizedBox(height: 10),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  appState.toggleFavorite();
+                },
+                icon: Icon(icon),
+                label: Text('Like'),
+              ),
+              SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  appState.getNext();
+                },
+                child: Text('Next'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ...
 
 class BigCard extends StatelessWidget {
   const BigCard({
@@ -112,4 +170,4 @@ class BigCard extends StatelessWidget {
   }
 }
 
-// https://codelabs.developers.google.com/codelabs/flutter-codelab-first#5:~:text=calls%20notifyListeners()%3B%20afterwards.-,Add%20the%20button,-With%20the%20%22business
+// https://codelabs.developers.google.com/codelabs/flutter-codelab-first#6:~:text=Stateless%20versus%20stateful%20widgets
