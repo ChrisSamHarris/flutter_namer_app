@@ -1,5 +1,6 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -57,39 +58,64 @@ class MyAppState extends ChangeNotifier {
 
 // ...
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+
+  var selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          SafeArea(
-            child: NavigationRail(
-              extended: false,
-              destinations: [
-                NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text('Home'),
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page = FavouritesPage();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          body: Row(
+            children: [
+              SafeArea(
+                child: NavigationRail(
+                  extended: constraints.maxWidth >= 600,
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home),
+                      label: Text('Home'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.favorite),
+                      label: Text('Favorites'),
+                    ),
+                  ],
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: (value) {
+                    setState(() {
+                      selectedIndex = value;
+                    });
+                  }),
                 ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.favorite),
-                  label: Text('Favorites'),
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: page,
                 ),
-              ],
-              selectedIndex: 0,
-              onDestinationSelected: (value) {
-                print('selected: $value');
-              },
-            ),
+              ),
+            ],
           ),
-          Expanded(
-            child: Container(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: GeneratorPage(),
-            ),
-          ),
-        ],
-      ),
+        );
+      }
     );
   }
 }
@@ -139,6 +165,41 @@ class GeneratorPage extends StatelessWidget {
   }
 }
 
+class FavouritesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    //var faves = appState.favorites;
+
+    if (appState.favorites.isEmpty) {
+      return Center(
+        child: Text('No favorites yet'),
+      );
+    }
+
+    return Center(
+      child: ListView(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Text("You have ${appState.favorites.length} favorites"),
+          ),
+          for (var fav in appState.favorites)
+            //Text(fav.asPascalCase)
+            ListTile(
+              title: Text(fav.asPascalCase),
+              leading: Icon(Icons.favorite),
+              // onTap: () {
+              //   appState.current = fav;
+              //   appState.favorites.remove(fav);
+              // },
+            ),
+        ],
+          ),
+    );
+  }
+}
+
 // ...
 
 class BigCard extends StatelessWidget {
@@ -170,4 +231,3 @@ class BigCard extends StatelessWidget {
   }
 }
 
-// https://codelabs.developers.google.com/codelabs/flutter-codelab-first#6:~:text=Stateless%20versus%20stateful%20widgets
